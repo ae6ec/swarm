@@ -1,0 +1,2 @@
+run in terminal 1:./server2
+run in terminal 2: ssh -R 5656:localhost:8080 serveo.net

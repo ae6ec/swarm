@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_menu_fab">
+    <item android:id="@+id/bluDisc"/>
+    <item android:id="@+id/bluOnOff"/>
+    <item android:id="@+id/blueOff1"/>
+    <item android:id="@+id/testoff"/>
+    <item android:id="@+id/bluAcceptThread"/>
+    <item android:id="@+id/WiFiDisc"/>
+    <item android:id="@+id/WiFiOnOff"/>
+    <item android:id="@+id/WiFiRecive"/>
+
+
+
+</menu>

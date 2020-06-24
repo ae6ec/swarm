@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+import socket
+import threading
+import sys
+class indata(threading.Thread):
+    def __init__(self,to,clientid,c):#,to):   ):
+        threading.Thread.__init__(self)
+        self.to=to
+        self.clientid=clientid
+        self.c=c
+        self.kill=0
+    def stopthread(self):
+        self.kill=1
+    def run(self):
+      print('\n[=] Enter "HelpSerVER" for help ')
+      while(True):
+        msg=input('\nEnter message ')
+        if self.kill==1:
+            break
+        elif msg=='HelpSerVER':
+            print('\n[=] Enter "resetforgood565616" to reset connection ')
+        elif msg=='resetforgood565616':
+            self.c.sendall(bytes(self.to+divider+self.clientid+divider+"CLOSE"+divider,'UTF-8'))
+            self.c.close()
+            newreset()
+        elif(msg==''):
+            #print('\n[-]No data sent as msg was None')
+        else:
+            self.c.sendall(bytes(self.to+divider+self.clientid+divider+"CHAT"+divider+msg,'UTF-8'))
+      print('\n[-] Cannot send msg to ',self.to)
+
+def newreset():
+    print('\n[+] Sending new connect request')
+    new=1
+    client.sendall(bytes('000000'+divider+'<N>'+divider+Type+divider+to+divider+'01'+divider+'\r\n','UTF-8'))
+#SERVER=socket.gethostbyname('serveo.net')
+#PORT = 5656
+
+print('Server:port ',SERVER,':',PORT)
+print('FOR TESTING GOING TO CONNECT TO 0.0.0.0:8080')
+SERVER = "127.0.0.1"
+print('Enter Port:')
+#PORT=8080
+PORT=int(input())
+
+to='000000'
+Type = input("Enter S for Source(Connecting to some client) or [s] for Sink(Connected to no one):")
+if (Type =='' or Type =='s'):
+    Type="SINK"
+    to='000000'
+if (Type =='S'):
+    Type="SORC"
+    to = input("Enter Client ID of The Other User :")
+if (Type =='echo'):
+    Type="ECHO"
+    to='000000'
+
+divider=':|:'
+clientid=0
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((SERVER, PORT))
+new=1
+newreset()
+
+while True:
+  in_data =  client.recv(2048)
+  temp=in_data.decode().split(divider,4)
+  if temp[2]=='ECHO':
+  	print('RECIEVED ECHO PACKET ',in_data.decode())
+  	client.sendall(bytes('000000'+divider+'<N>'+divider+"CLOSE"+divider,'UTF-8'))
+  	break
+  elif (temp[2]=='CHAT' and temp[3]==''):
+      print('\n[-]DISCARDING PACKET | packet was ',in_data.decode())
+      continue
+  if not len(temp)>3:
+    print('\n[-]Corrupted data format ',in_data.decode())
+  if new==1:
+    print("[+]handshake data From Server :" ,in_data.decode())
+    handshakedata=in_data.decode().split(divider,5)
+    if handshakedata[2]=='CACK' and handshakedata[3]=='SINK':
+        new=0
+
+        print('\n[+] handshake Successful Acting as Sink')
+    elif handshakedata[2]=="CACK":
+        new=10
+        print('\n[+] handshake Successful acting as source for ',to)
+    elif handshakedata[2]=='FCN' :
+        print('\n[-] handshake Successful Failed to act as source for ',to,' No Such Client')
+    else:
+        print('\n[-] handshake Failed Communicating with no one')
+        newreset()
+        break
+    clientid=handshakedata[0]
+    print("\n[+]Client id :",clientid)
+    newthread = indata(handshakedata[1],clientid,client)
+    if new==10:
+        newthread.start()
+    else:
+        print('\n[-]Not Communicating with any devices')
+
+  if temp[2]=='CSRC':
+      temp=in_data.decode().split(divider,5)
+      print("\nClient :",temp[3]," wants to connect to you ")
+      isCD=input('\n[yes] or no')
+
+      isCD=isCD.lower()
+      if isCD=='':
+          isCD='y'
+      if isCD=='y' or isCD=='yes':
+          print('\n[+] Connected to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"CACK"+divider,'UTF-8'))
+          to=temp[3]
+          newthread = indata(temp[3],clientid,client)
+          newthread.start()
+      elif isCD=='n' or isCD=='no':
+          print('\n[+] Refused Connection to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"FCN"+divider,'UTF-8'))
+      else:
+          print('\n[-]Incorrect Data entered :',isCD)
+          print('\n[-] Refused Connection to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"FCN"+divider,'UTF-8'))
+
+  if temp[2]=='CHAT':
+      print("\n",to,':',temp[3])
+
+      '''
+client.close()

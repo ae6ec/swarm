@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Swarm</string>
+    <string name="blu">Bluetooth</string>
+    <string name="bluOnOff">Bluetooth On/Off</string>
+    <string name="Disc">Discover</string>
+    <string name="Ooshit">other sShit</string>
+    <string name="BluNotPresent">Your device does not support Bluetooth</string>
+    <string name="unknownDevice">Unknown Devies</string>
+    <string name="pairedDevice">Paired Devies</string>
+    <string name="WiFiDevice">WiFi Known Devies</string>
+    <string name="title_activity_blu_connect_chat">Bluetooth Control </string>
+    <string name="bluStartAcceptThread">Receive</string>
+    <string name="bluDiscoverability">Discoverablity on/off</string>
+    <string name="bluTypeaMsg">Type a Message</string>
+    <string name="bluSendMsg">></string>
+    <string name="Wifi">Wi-Fi</string>
+    <string name="WifiOnOff">Wi-Fi On/Off</string>
+    <string name="WiFiDNP">Enable Wi-Fi</string>
+    <string name="title_activity_yggdrasil">yggdrasil</string>
+
+
+</resources>

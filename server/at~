@@ -1,0 +1,302 @@
+#!/usr/bin/env python3
+import socket
+import threading
+import sys
+class indata(threading.Thread):
+    def __init__(self,to,clientid,c):#,to):   ):
+        threading.Thread.__init__(self)
+        self.to=to
+        self.clientid=clientid
+        self.c=c
+        self.kill=0
+    def stopthread(self):
+        self.kill=1
+    def run(self):
+
+      print('\n[=] Enter "help565616" for help ')
+      while(True):
+        msg=input('\nEnter message ')
+        if self.kill==1:
+            #print('KILLED')
+            break
+        elif msg=='help565616':
+            print('\n[=] Enter "qweasdzxc" to exit ')
+            print('\n[=] Enter "resetforgood565616" to reset connection ')
+            print('\n[=] Enter "qweasdzxc" to Terminate connection ')            
+        elif msg=='bye5656':
+            break
+        elif msg=='resetforgood565616':
+            self.c.sendall(bytes(self.to+divider+self.clientid+divider+"CLOSE"+divider,'UTF-8'))
+            newreset()
+        elif msg=='qweasdzxc':
+            print('\n[-]Closing Connection to SERVER')
+            self.c.sendall(bytes(self.to+divider+self.clientid+divider+"CLOSE"+divider,'UTF-8'))
+        elif(msg==''):
+            print('\n[-]No data sent as msg was None')#can be removed
+        else:
+            #print('\nDATA SENT :',self.to+divider+self.clientid+divider+"CHAT"+divider+msg)
+            self.c.sendall(bytes(self.to+divider+self.clientid+divider+"CHAT"+divider+msg,'UTF-8'))
+        #c.sendall(bytes(to+divider+id+divider+"CHAT"+divider+msg,'UTF-8'))
+        #print('DATA SENT :',to+divider+id+divider+"CHAT"+divider+msg)
+      print('\n[-] Cannot send msg to ',self.to)
+
+'''
+def indata(c):
+  isR=True
+  print('\n[=] Enter "help565616" for help ')
+  while(isR):
+    msg=input('Enter message ')
+    if msg=='help565616':
+        print('\n[=] Enter "qweasdzxc" to exit ')
+        print('\n[=] Enter "resetforgood565616" to reset connection ')
+    elif msg=='bye3381':
+        sys.exit()
+    elif msg=='resetforgood565616':
+        c.sendall(bytes(to+divider+clientid+divider+"CLOSE"+divider,'UTF-8'))
+        newreset()
+    elif msg=='qweasdzxc':
+        print('\nClosing Connection to SERVER')
+        c.sendall(bytes(to+divider+clientid+divider+"CLOSE"+divider,'UTF-8'))
+    elif(msg==''):
+        print('No data sent as msg was None')#can be removed
+    else:
+        print('DATA SENT :',to+divider+clientid+divider+"CHAT"+divider+msg)
+        c.sendall(bytes(to+divider+clientid+divider+"CHAT"+divider+msg,'UTF-8'))
+    #c.sendall(bytes(to+divider+id+divider+"CHAT"+divider+msg,'UTF-8'))
+    #print('DATA SENT :',to+divider+id+divider+"CHAT"+divider+msg)
+    print('ending input stream to ',to)
+'''
+
+def newreset():
+    print('\n[+] Sending new connect request')
+    new=1
+    client.sendall(bytes('000000'+divider+'<NULL>'+divider+Type+divider+to+'01','UTF-8'))
+    #FIRST DATA SENT WILL BE (to/from/what/data) SERVER/NULL/TYPE/TO WHOM/PROGRAM
+    #PROGRAM python=01;java=02
+	
+#IF TYPE IN FIRST ONE IS ECHO THEN SERVER WILL SEND OKAY ONLY
+#s = input("Enter Server address:")
+#SERVER = "127.0.0.1"
+#SERVER = "kkmodi.freemyip.com"
+#SERVER=socket.gethostbyname('kkmodi.freemyip.com')
+SERVER=socket.gethostbyname('serveo.net')
+#REMOVE SERVER AND ADD AN SERVEO LIKE SHIT
+PORT = 5656
+
+
+
+
+
+print('Server:port ',SERVER,':',PORT)
+print('FOR TESTING GOING TO CONNECT TO 0.0.0.0:8080')
+SERVER = "127.0.0.1"
+PORT=8080
+
+to='000000'
+Type = input("Enter S for Source(Connecting to some client) or [s] for Sink(Connected to no one):")
+if (Type =='' or Type =='s'):
+    Type="SINK"
+    to='000000'
+if (Type =='S'):
+    Type="SORC"
+    to = input("Enter Client ID of The Other User :")
+if (Type =='echo'):
+    Type="ECHO"
+    to='000000'   
+
+divider=':|:'
+clientid=0
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((SERVER, PORT))
+#client.sendall(bytes("This is from Client",'UTF-8'))
+#to='000000'
+
+new=1
+#passtomain=0
+#
+#MAKE INPUT AND OUTPUT STREAM DIFFERNT THREADS
+#
+#
+#
+#
+#TEST
+#sendsocket=null
+#t=None#Thread(target=indata, args=(to,handshakedata[0],client,))
+#client.sendall(bytes('000000'+divider+'<NULL>'+divider+Type+divider+to,'UTF-8'))
+newreset()
+
+while True:
+ # print('R')
+  in_data =  client.recv(2048)
+  temp=in_data.decode().split(divider,4)
+  if temp[2]=='ECHO':
+  	print('RECIEVED ECHO PACKET ',in_data.decode())
+  	client.sendall(bytes('000000'+divider+'<NULL>'+divider+"CLOSE"+divider,'UTF-8'))
+  	break	
+  elif (temp[2]=='CHAT' and temp[3]==''):
+      print('\n[-]DISCARDING PACKET | packet was ',in_data.decode())
+      continue
+#  if not(len(temp) >3):
+    #print("[-]broken package")
+    #print('[~]Broken Data :',in_data.decode())
+    #continue
+  #print("checking stuff")
+  if not len(temp)>3:
+    print('\n[-]Corrupted data format ',in_data.decode())
+  if new==1:
+    #print('trying stuff')
+    
+    print("[+]handshake data From Server :" ,in_data.decode())
+    handshakedata=in_data.decode().split(divider,5)
+      #for Sink what=CACK and data 'SINK' =>to/from/what/data
+    #print('handskae data is',in_data.decode())
+    if handshakedata[2]=='CACK' and handshakedata[3]=='SINK':
+        new=0
+
+        print('\n[+] handshake Successful Acting as Sink')
+      #for Sorc Successful what=CACK data =SORC and data=theclientid of connecting to one
+      #for Sorc unsuccessful what=FCN data =SORC and data=theclientid of connecting to one
+    elif handshakedata[2]=="CACK":
+        new=10
+        print('\n[+] handshake Successful acting as source for ',to)
+    elif handshakedata[2]=='FCN' :
+        print('\n[-] handshake Successful Failed to act as source for ',to,' No Such Client')
+    else:
+        print('\n[-] handshake Failed Communicating with no one')
+        newreset()
+        break
+        # data corrupted |data was',in_data.decode())
+    clientid=handshakedata[0]
+    print("\n[+]Client id :",clientid)
+    #t=Thread(target=indata, args=(client,))
+    newthread = indata(handshakedata[1],clientid,client)
+#    if new==0:
+        #FOR SINK ECHO TESTING
+        #newthread.start()
+    if new==10:
+        newthread.start()
+    else:
+        print('\n[-]Not Communicating with any devices',new)
+        #print('[-]no thread of input stream made | new=',new)
+
+
+
+
+    #new=0
+  if temp[2]=='CSRC':
+       temp=in_data.decode().split(divider,5)
+#      newthread.stopthread()
+#      print('\nis thread alive',newthread.isAlive())
+      print("\nClient :",temp[3]," wants to connect to you ")
+#      print('\nONLY FOR TERMINAL ENTER "anything"')
+
+      #passtomain=1
+      #t.exit()
+      isCD=input('\n[yes] or no')
+
+
+      isCD=isCD.lower()
+      if isCD=='':
+          isCD='y'
+      if isCD=='y' or isCD=='yes':
+          print('\n[+] Connected to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"CACK"+divider,'UTF-8'))
+          to=temp[3]
+          newthread = indata(temp[3],clientid,client)
+          newthread.start()
+          #newthread = indata(temp[3],clientid,client)
+          #print('to Client id :',to)
+          #print('Enter "bye" in input to send data')
+          #t2=Thread(target=indata, args=(client,))
+          #t2.start()
+      elif isCD=='n' or isCD=='no':
+          print('\n[+] Refused Connection to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"FCN"+divider,'UTF-8'))
+# THESE CONNECTS TO SERVER FOR SINK ECHO TESTING
+#          newthread = indata(to,clientid,client)
+#          newthread.start()
+      else:
+          print('\n[-]Incorrect Data entered :',isCD)
+          print('\n[-] Refused Connection to',temp[3])
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"FCN"+divider,'UTF-8'))
+# THESE CONNECTS TO SERVER FOR SINK ECHO TESTING
+#          newthread = indata(to,clientid,client)
+#          newthread.start()
+
+  if temp[2]=='CHAT':
+      print("\n",to,':',temp[3])
+#  print('From server ',in_data.decode())
+  '''
+  out_data = input("Enter Message:")
+  print('chat going to :',to)
+  if(out_data==''):
+    client.sendall(bytes(to+divider+clientid+divider+"NULL"+divider+"<NULL>",'UTF-8'))
+  else:
+    client.sendall(bytes(to+divider+clientid+divider+"CHAT"+divider+out_data,'UTF-8'))
+
+  print('sent')
+  if out_data=='bye':
+    break
+  if out_data=='moreinfo':
+      print('client ID:',clientid)
+      print('Sending Data to ', 'SERVER 'if to=='000000' else to)
+      '''
+client.close()
+
+'''
+            if len(data)!>3:
+                print('length of data is less than three | data:',rawdata)
+                print('[-]Disconnecting from client for now')
+                break
+            elif data[-1]=='bye':
+        		print("[-]Disconnecing initalted by client")
+        		break
+        	elif rawdata=='':
+        	       print('[-]Disconnecting no Data from client')
+            elif data[2]
+            elif data[2]=="CHAT":
+                if data[0]=='000000':
+                    self.csocket.send(bytes(self.cid+divider+self.to+divider+"chat"+divider+msg.split(divider,4)[3],'UTF-8'))
+                else:
+                    sendsocsket=client[data[0]]
+                    sendsocket.send(bytes(self.cid+divider+self.to+divider+"chat"+divider+msg.split(divider,4)[3],'UTF-8'))
+                #THIS IS FOR NOW
+        		i=0
+		    #print ("from client", msg)
+        	#self.csocket.send(bytes(msg,'UTF-8'))
+        print ("Client at ", clientAddress , " disconnected...")
+        del self.client[self.cid]
+
+
+
+'''
+'''
+import socket
+SERVER = "127.0.0.1"
+PORT = 8080
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((SERVER, PORT))
+client.sendall(bytes("This is from Client",'UTF-8'))
+while True:
+  in_data =  client.recv(1024)
+  print("From Server :" ,in_data.decode())
+  out_data = input()
+  client.sendall(bytes(out_data,'UTF-8'))
+  if out_data=='bye':
+    break
+client.close()
+'''
+
+'''
+at_kkmodi
+
+    clientsock.send(bytes(session,'UTF-8'))
+    data=clientsock.recv(2048)
+    data=data.decode()
+    print("[+]Message handshake data from client ",data)
+    temp=data.split(divider,4)
+
+
+
+
+'''

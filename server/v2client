@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+import socket
+from threading import Thread
+
+def indata(to,id,c):
+  isR=True
+  while(isR):
+    msg=input('Enter message')
+    if msg=='bye':
+      break
+    if(msg==''):
+        print('no data sent as msg was None')
+    else:
+        c.sendall(bytes(to+divider+clientid+divider+"CHAT"+divider+msg,'UTF-8'))
+    #c.sendall(bytes(to+divider+id+divider+"CHAT"+divider+msg,'UTF-8'))
+    print('DATA SENT :',to+divider+id+divider+"CHAT"+divider+msg)
+
+SERVER = "127.0.0.1"
+PORT = 8080
+to='000000'
+Type = input("Enter S for Source(Connecting to some client) or [s] for Sink(Connected to no one):")
+if (Type =='' or Type =='s'):
+    Type="SINK"
+    to='000000'
+if (Type =='S'):
+    Type="SORC"
+    to = input("Enter Client ID of The Other User :")
+
+divider=':|:'
+clientid=0
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((SERVER, PORT))
+#client.sendall(bytes("This is from Client",'UTF-8'))
+#to='000000'
+
+new=1
+
+#
+#MAKE INPUT AND OUTPUT STREAM DIFFERNT THREADS
+#
+#
+#
+#
+#TEST
+#sendsocket=null
+t=None#Thread(target=indata, args=(to,handshakedata[0],client,))
+client.sendall(bytes('000000'+divider+'<NULL>'+divider+Type+divider+to,'UTF-8'))
+while True:
+    #print('R')
+  in_data =  client.recv(2048)
+  temp=in_data.decode().split(divider,4)
+#  if not(len(temp) >3):
+    #print("[-]broken package")
+    #print('[~]Broken Data :',in_data.decode())
+    #continue
+  #print("checking stuff")
+  if not len(temp)>3:
+    print('Corrupted data format ',in_data.decode())
+  if new==1:
+    #print('trying stuff')
+    print("Test From Server :" ,in_data.decode())
+    handshakedata=in_data.decode().split(divider,5)
+      #for Sink what=CACK and data 'SINK' =>to/from/what/data
+    print('handskae data is',in_data.decode())
+    if handshakedata[2]=='CACK' and handshakedata[3]=='SINK':
+        new=0
+
+        print('[+] handshake Successful Acting as Sink')
+      #for Sorc Successful what=CACK data =SORC and data=theclientid of connecting to one
+      #for Sorc unsuccessful what=FCN data =SORC and data=theclientid of connecting to one
+    elif handshakedata[2]=="CACK":
+        new=10
+        print('[+] handshakedata Successful acting as source for ',to)
+    elif handshakedata[2]=='FCN' :
+        print('[+] handshakedata Successful Failed to act as source for ',to,' No Such Client')
+    else:
+        print('[-] hanskahe with none data corrupted |data was',in_data.decode())
+    clientid=handshakedata[0]
+    print("[+]Client id :",clientid)
+    t=Thread(target=indata, args=(to,handshakedata[0],client,))
+    if new==0:
+        t.start()
+    elif new==10:
+        t.start()
+    else:
+        print('no thread of input stream made | new=',new)
+
+
+
+    #new=0
+  if temp[2]=='CSRC':
+      print("Client :",temp[3]," wants to connect to you ")
+      print('ONLY FOR TERMINAL ENTER "bye"')
+      isCD=input('[Y]es or No')
+      isCD=isCD.lower()
+      if isCD=='':
+          isCD='y'
+      if isCD=='y':
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"CACK"+divider,'UTF-8'))
+          to=temp[3]
+          #print('to Client id :',to)
+          #print('Enter "bye" in input to send data')
+          t2=Thread(target=indata, args=(to,handshakedata[0],client,))
+          t2.start()
+      elif isCD=='n':
+          client.sendall(bytes(temp[3]+divider+clientid+divider+"FCN"+divider,'UTF-8'))
+
+
+  print("From Server :" ,in_data.decode())
+  '''
+  out_data = input("Enter Message:")
+  print('chat going to :',to)
+  if(out_data==''):
+    client.sendall(bytes(to+divider+clientid+divider+"NULL"+divider+"<NULL>",'UTF-8'))
+  else:
+    client.sendall(bytes(to+divider+clientid+divider+"CHAT"+divider+out_data,'UTF-8'))
+
+  print('sent')
+  if out_data=='bye':
+    break
+  if out_data=='moreinfo':
+      print('client ID:',clientid)
+      print('Sending Data to ', 'SERVER 'if to=='000000' else to)
+      '''
+client.close()
+
+'''
+            if len(data)!>3:
+                print('length of data is less than three | data:',rawdata)
+                print('[-]Disconnecting from client for now')
+                break
+            elif data[-1]=='bye':
+        		print("[-]Disconnecing initalted by client")
+        		break
+        	elif rawdata=='':
+        	       print('[-]Disconnecting no Data from client')
+            elif data[2]
+            elif data[2]=="CHAT":
+                if data[0]=='000000':
+                    self.csocket.send(bytes(self.cid+divider+self.to+divider+"chat"+divider+msg.split(divider,4)[3],'UTF-8'))
+                else:
+                    sendsocsket=client[data[0]]
+                    sendsocket.send(bytes(self.cid+divider+self.to+divider+"chat"+divider+msg.split(divider,4)[3],'UTF-8'))
+                #THIS IS FOR NOW
+        		i=0
+		    #print ("from client", msg)
+        	#self.csocket.send(bytes(msg,'UTF-8'))
+        print ("Client at ", clientAddress , " disconnected...")
+        del self.client[self.cid]
+
+
+
+'''
+'''
+import socket
+SERVER = "127.0.0.1"
+PORT = 8080
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((SERVER, PORT))
+client.sendall(bytes("This is from Client",'UTF-8'))
+while True:
+  in_data =  client.recv(1024)
+  print("From Server :" ,in_data.decode())
+  out_data = input()
+  client.sendall(bytes(out_data,'UTF-8'))
+  if out_data=='bye':
+    break
+client.close()
+'''
+
+'''
+at_kkmodi
+
+    clientsock.send(bytes(session,'UTF-8'))
+    data=clientsock.recv(2048)
+    data=data.decode()
+    print("[+]Message handshake data from client ",data)
+    temp=data.split(divider,4)
+
+
+
+
+'''

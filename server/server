@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+import socket, threading
+import random
+
+class ClientThread(threading.Thread):
+
+    def __init__(self,clientAddress,clientsocket,clients,cid):#,to):   ):
+        threading.Thread.__init__(self)
+        #self.to=to# MAYBE SOURCE OR SOMEONE ELSE
+        self.cid=cid# USER
+        self.csocket = clientsocket
+        #self.clients=clients
+        print ("New connection added: ", clientAddress)
+
+
+    def run(self):
+        #print ("Connection from : ", clientAddress)
+        #self.csocket.send(bytes("Hi, This is from Server..",'utf-8'))
+        check=0
+        msg = ''
+        divider=":|:"
+        i=0
+        to='000000'
+        print("[+]Starting Recieve client CID:",self.cid)
+        isCD=0
+
+        while True:
+            rawdata = self.csocket.recv(2048)
+            data = rawdata.decode().split(divider,4)
+            print ("from client",rawdata.decode()) #Test
+            #add here no data if
+            if not len(data[0])==6:
+                for i in range(1,len(data[0])):
+                    k=rawdata.decode()[i:].split(divider,4)
+                    if len(k[0])==6 and k[0].isdigit():
+                        data=k
+                        print("Error corrected [",i," iterations]")
+                        break
+                print('data corrected ',data)
+            if i>60:
+                print('[-]Disconnecting with',self.cid,' Due to Inactivity')
+                break
+
+            if rawdata=="":
+                i+=1
+                print('retrying ',i)
+                print('\n[-]DISCARDING PACKET | packet was ',in_data.decode())
+                continue
+            elif check==1:
+                if(data[2]=='CACK'):
+                    isCD=1
+                    to=data[1]
+                    print('[+]connected to device ',data[3])
+                    #sendsocket=self.clients[data[0]]
+                    #sendsocket=clients[data[0]][0]
+                    check=0
+                    #self.socket.sendall(bytes(self.cid+divider+'000000'+divider+"CACK"+divider+'SORC'+divider+to,'UTF-8'))
+                elif data[2]=='NACK':
+                    isCD=0
+                    to='000000'
+                    check=0
+                    #self.socket.sendall(bytes(self.cid+divider+'000000'+divider+"FCN"+divider+'SORC'+divider+to,'UTF-8'))
+                    print('[-]connection to device ',data[3],' failed')
+                else:
+                    #print('dataack data was',rawdata.decode())
+                    check=0
+            #elif not(len(data)>3):
+                #print('packet Corrupted')
+            elif(data[2]=='SINK'):
+                data = rawdata.decode().split(divider,6) #fix these if statements
+                if not len(data[0])==6:
+                    for i in range(1,len(data[0])):
+                        k=rawdata.decode()[i:].split(divider,6)
+                        if len(k[0])==6 and k[0].isdigit():
+                            data=k
+                            print("Error corrected [",i," iterations]")
+                            break            
+
+                print("[+]Device ",self.cid," acting as Sink")
+                print("[+] add data[0]=='000000' and  on sink wala if and remove this ")
+                to='000000'
+                print('DATA is :',data)#test
+                print('ENDING IS ',data[4]) #test
+                self.tempend='\r\n'if data[4]=='02' else ''#test
+                clients[self.cid]=(clients[self.cid][0],self.tempend)#test
+                print('now end is ',"JAVA ONE" if self.tempend=='\r\n' else '<N>')#test
+                self.csocket.sendall(bytes(self.cid+divider+to+divider+"CACK"+divider+data[2]+clients[self.cid][1],'UTF-8'))
+                print('[+] CACK sent')
+            elif(data[2]=='SORC'):
+                data = rawdata.decode().split(divider,6)
+                print("[+] Device",self.cid," acting as source for :",data[3])
+                print("[+] add data[0]=='000000' and  on soc wala if and remove this ")
+
+                print('DATA is :',rawdata.decode())#test
+                print('ENDING IS ',data[4])#test
+                self.tempend='\r\n'if data[4]=='02' else ''#test
+                clients[self.cid]=(clients[self.cid][0],self.tempend)#test
+                print('now end is ',"JAVA ONE" if self.tempend=='\r\n' else '<N>')#test
+                if(data[3] in clients):
+                    #sendsocket=
+#                if(data[3] in self.clients): IF DOESN'T WORK THEN REMOVE
+#                    sendsocket=self.clients[data[3]]
+                    print("[+]Device ",data[3]," found")#now as send a signal to data to change to [CSRC]
+                    #self.tempend=clients[data[3]][1]
+                    clients[data[3]][0].sendall(bytes(data[3]+divider+self.cid+divider+"CSRC"+divider+self.cid+divider+clients[data[3]][1],'UTF-8'))
+                    #Sending ACK will have \n
+                    #k = self.csocket.recv(2048)#self.scoket
+                    #dataack = k.decode().split(divider,4)
+                    #print('dataack')
+                    check=1
+                else:
+                    print("[-]Device ",data[3]," not found")
+                    check=0
+                    #self.tempend=clients[self.cid][1]
+                    self.csocket.sendall(bytes(self.cid+divider+to+divider+"FCN"+divider+data[2]+divider+data[3]+clients[self.cid][1],'UTF-8'))
+            elif data[2]=='CLOSE':
+                print('[-]Disconnecting from user Initiated by Device')
+                break
+
+            if data[2]=="CHAT" or data[2]=='NULL' or data[2]=='CACK' or data[2]=='NACK' or data[2]=='FCN' or data[2]=='ECHO':
+                    #print('Chat Data is ',data[3],' data[0] is',data[0],'and to is ',to)
+            #for x in rawdata.decode():
+                    #print(x)
+                    if(data[0]=="!00000"):
+                        print('[+] its is java right GODDAMNIT ')
+                        data[0]='000000'
+                    if data[2]=='CACK' or data[2] =='NACK' or data[2]=='FCN':
+                        print(data[2],'|',self.cid,'->',data[0])
+                        #self.tempend=
+                        clients[data[0]][0].sendall(bytes(data[0]+divider+self.cid+divider+data[2]+divider+clients[data[0]][1],'UTF-8'))
+                        #self.clients[data[0]].sendall(bytes(data[0]+divider+self.cid+divider+data[2]+divider,'UTF-8'))
+                    elif data[2]=='ECHO':
+                        print(data[2],'|','SERVER','->',self.cid)
+                        self.csocket.sendall(bytes(self.cid+divider+to+divider+"ECHO"+divider+clients[self.cid][1],'UTF-8'))
+                    elif data[0]=='000000':
+                        print(data[2],'|',self.cid,'->',data[0])
+                        self.csocket.sendall(bytes(self.cid+divider+to+divider+"CHAT"+divider+data[3]+clients[self.cid][1],'UTF-8'))
+                    else:
+                        print(data[2],'|',self.cid,'->',data[0])
+                        #self.tempend=
+                       # self.clients[data[0]].sendall(bytes(data[0]+divider+self.cid+divider+"CHAT"+divider+data[3],'UTF-8'))
+                        clients[data[0]][0].sendall(bytes(data[0]+divider+self.cid+divider+"CHAT"+divider+data[3]+clients[data[0]][1],'UTF-8'))
+                    i=0
+        print("Device at ", clientAddress , " disconnected...")
+        del clients[self.cid]
+
+
+
+
+#DRIVER CODE
+HOST = "0.0.0.0"
+#PORT = 8080
+print('Enter Port ')
+PORT=int(input())
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server.bind((HOST, PORT))
+clients={}
+print("Server started")
+print("Waiting for client request..")
+
+while True:
+    #print("[+]Accepting self.clients")
+    server.listen(1)
+    clientsock, clientAddress = server.accept()
+
+    #divider=":|:"
+    clientid=''
+    #session=''
+
+    while(True):
+        for x in range(6):
+            clientid+=str(random.randint(1,9))
+    #newthread = ClientThread(clientAddress, clientsock,client,clientid)
+    #session+=clientid+divider+'000000'+divider+"CID"+divider+clientid+divider
+        if clientid not in clients:
+            break
+
+    clients[clientid]=(clientsock,'')
+    print("[+]Device added ")
+    test=[k for k in clients]
+    print('Device List at the moment',test)
+#data form at_kkmodi
+    newthread = ClientThread(clientAddress, clientsock,clients,clientid)
+    # remove this above one
+    newthread.start()
+
+
+
+
+
+'''
+if client wants to connect to other client then send clientid
+server id 00000
+ wants to connect SORC
+doesn't want to connect SINK
+client.sendall(bytes('SERVER'+divider+clientid+divider+11+divider+_THECLIENTIDHERE_+__PROGRAMIDHERE_+ '\r\n','UTF-8'))
+PROGRAMID python=01;java=02
+ MESSAGE FORMAT   TO/from/what/data
+ NACK no ack
+CACK =change ack
+FCN= failed change negative ack
+CSRC changing source
+'''
